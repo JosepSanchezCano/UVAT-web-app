@@ -33,6 +33,8 @@ The app is built using Flask as a framework to manage frontend requests to the b
    ```
 3. If Flask installation fails, follow the official Flask installation guide for your operating system.
 
+4. To run the app you need the weights for each AI model. In SAM's case the model will download the weights upon execution of the model. This means that the first time that you execute the web app you will need to wait till the weights have been completly downloaded. The Cutie weights must be downloaded from their github at: https://github.com/hkchengrex/Cutie. Once downloaded please put the weights inside of the flaskr/weights/ folder.
+
 ## Running the Local Server
 
 Since this app is not intended for deployment, it will be run locally using the Flask development server. To start the server:

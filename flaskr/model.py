@@ -90,7 +90,7 @@ class Video:
                 if not read:
                     break
                 frames.append(frame)
-                cv2.imwrite(f"flaskr/static/temp_frames/frame_{count}.png",frame)
+                # cv2.imwrite(f"flaskr/static/temp_frames/frame_{count}.png",frame)
                 # ret = msretinex.mainRetinex(frame)
                 #print(f"the retinex image is: {ret}")
                 # retinex.append(ret)

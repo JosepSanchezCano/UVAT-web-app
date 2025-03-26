@@ -17,7 +17,7 @@ var counter = 0
 var playNextFrame = false
 var fps = 15.049
 
-var videoFrames = new Array()
+var videoFrames = Array()
 
 var drawnVideoSize = (0,0)
 var playingForward = true
@@ -76,9 +76,10 @@ function stepBackward() {
 
 
 function loadVideo(){
-  videoFrames = getFrames();
+  getFrames();
+  console.log("loading video")
   console.log(videoFrames)
-  ctx.drawImage(videoFrames['frames'], 0, 0, 1200, 800);
+  ctx.drawImage(videoFrames[0], 0, 0, 1200, 800);
   }
 function updateCanvas(){
     ctx.clearRect(0,0,canvas.width,canvas.height); 
@@ -669,7 +670,8 @@ function getFrames() {
     success: function(response){
       masks_cutie = response
       let frames = masks_cutie.frames;
-      console.log(masks_cutie)      
+      console.log("frames") 
+      console.log(frames)      
 
       frames.forEach((frame,index) => {
         let img = new Image();
@@ -677,7 +679,7 @@ function getFrames() {
         temporalFrames.push(img);
       });
 
-      return temporalFrames;
+      videoFrames = temporalFrames;
     },
     error: function(error){
       console.log(error);
