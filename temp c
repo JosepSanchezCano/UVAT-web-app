@@ -1,0 +1,74 @@
+const video = document.createElement("video");
+video.src = "your-video.mp4"; // Replace with the path to your video file
+video.crossOrigin = "anonymous";
+video.controls = true;
+video.style.display = "block";
+
+document.body.appendChild(video);
+
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+document.body.appendChild(canvas);
+
+video.addEventListener("loadeddata", () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    drawFrame();
+});
+
+video.addEventListener("play", function () {
+    function step() {
+        if (!video.paused && !video.ended) {
+            drawFrame();
+            requestAnimationFrame(step);
+        }
+    }
+    requestAnimationFrame(step);
+});
+
+function drawFrame() {
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+}
+
+function stepForward() {
+    video.pause();
+    video.currentTime += 1 / 30; // Adjust for video frame rate
+    video.addEventListener("seeked", drawFrame, { once: true });
+}
+
+function stepBackward() {
+    video.pause();
+    video.currentTime -= 1 / 30; // Adjust for video frame rate
+    video.addEventListener("seeked", drawFrame, { once: true });
+}
+
+function playVideo() {
+    if (video.paused || video.ended) {
+        function step() {
+            if (!video.paused && !video.ended) {
+                video.currentTime += 1 / 30;
+                video.addEventListener("seeked", () => {
+                    drawFrame();
+                    requestAnimationFrame(step);
+                }, { once: true });
+            }
+        }
+        video.play();
+        requestAnimationFrame(step);
+    }
+}
+
+const forwardButton = document.createElement("button");
+forwardButton.innerText = "Next Frame";
+forwardButton.onclick = stepForward;
+document.body.appendChild(forwardButton);
+
+const backwardButton = document.createElement("button");
+backwardButton.innerText = "Previous Frame";
+backwardButton.onclick = stepBackward;
+document.body.appendChild(backwardButton);
+
+const playButton = document.createElement("button");
+playButton.innerText = "Play";
+playButton.onclick = playVideo;
+document.body.appendChild(playButton);

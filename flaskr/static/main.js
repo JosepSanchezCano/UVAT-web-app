@@ -4,3 +4,9 @@ document.getElementById("upload-file").onchange = function(){
         javascript_data: $("#upload_file").val()
     });
 };
+
+// $.ajax({
+//     type:"POST",
+//     url:"http://ruta",
+//     data:{}
+// })

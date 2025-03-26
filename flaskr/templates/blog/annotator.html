@@ -1,0 +1,137 @@
+
+
+{% extends 'base.html' %}
+
+{% block header %}
+
+  {#<!-- {% if g.user %}
+    <a class="action" href="{{ url_for('blog.create') }}">New</a>
+  {% endif %} -->#}
+
+{% endblock %}
+
+{% block content %}
+{#
+    <!-- {% for post in posts %}
+    <article class="post">
+      <header>
+        <div>
+          <h1>{{ post['title'] }}</h1>
+          <div class="about">by {{ post['username'] }} on {{ post['created'].strftime('%Y-%m-%d') }}</div>
+        </div>
+        {% if g.user['id'] == post['author_id'] %}
+          <a class="action" href="{{ url_for('blog.update', id=post['id']) }}">Edit</a>
+        {% endif %}
+      </header>
+      <p class="body">{{ post['body'] }}</p>
+    </article>
+    {% if not loop.last %}
+      <hr>
+    {% endif %}
+  {% endfor %} -->
+#}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-auto bg-light sticky-top">
+            <div class="d-flex flex-sm-column flex-row flex-nowrap bg-light align-items-center sticky-top">
+                <a href="/" class="d-block p-3 link-dark text-decoration-none" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Icon-only">
+                    <i class="bi-bootstrap fs-1"></i>
+                </a>
+                <ul class="nav nav-pills nav-flush flex-sm-column flex-row flex-nowrap mb-auto mx-auto text-center justify-content-between w-100 px-3 align-items-center">
+                    <li class="nav-item">
+
+                        <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                            {#<!-- <input type="file" id="myFile" name="filename">
+                            <input type="submit" value="Load Video"> -->
+                            <!-- <i class="bi-house fs-1">Load video</i> -->#}
+                            <form  action="/video_feed" method = "POST" enctype="multipart/form-data">
+                                <label for="upload-file">Load Video</label>
+                                <input type="file" name="file" id="upload-file"/>
+                                <input type = "submit" value="Upload">
+                            </form>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Dashboard">
+                            <form  actino="" id="apply_sam" method = "POST">
+                                <!-- <label>Apply SAM</label> -->
+                                <input type = "submit" value="Apply SAM">
+                            </form>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Orders">
+                            <form  actino="" id="apply_cutie" method = "POST">
+                                <!-- <label>Apply SAM</label> -->
+                                <input type = "submit" value="Apply Cutie">
+                            </form>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Products">
+                            <button src="{{url_for('static', filename='images/floppy.svg')}}" title="Save annotations" id="saveAnn">
+                            <!-- <p>Save annotations</p> -->
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Customers">
+                            <i class="bi-people fs-1"></i>
+                        </a>
+                    </li>
+                </ul>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center justify-content-center p-3 link-dark text-decoration-none dropdown-toggle" id="dropdownUser3" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi-person-circle h2"></i>
+                    </a>
+                    <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser3">
+                        <li><a class="dropdown-item" href="#">Placeholder 1</a></li>
+                        <li><a class="dropdown-item" href="#">Placeholder 2</a></li>
+                        <li><a class="dropdown-item" href="#">Placeholder 3</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm p-3 min-vh-100">
+            
+            <video id="video" hidden src="{{url_for('static', filename=video_filepath)}}" controls crossorigin="anonymous">
+
+            </video>
+
+            <p id="frameNumber" hidden>{{ numFramesVideo }}</p>
+
+            <!-- content -->
+             <h1>Annotated Video</h1>
+
+            <canvas id="myCanvas" class="myCanvas" width="1250" height="800" style="border: 5px solid #000000;">Update your browser to support HTML5 Canvas</canvas>
+        </div>
+        <div class="col-sm p-3 min-vh-10">
+            <ul>
+                <li>
+                    <button id="nextFrame">Siguiente frame</button>
+                </li>
+                <li>
+                    <button id="lastFrame">Anterior frame</button>
+                </li>
+                <li>
+                    <button id="changeModo">Corregir</button>
+                </li>
+                <li>
+                    <button id="playButton">Play</button>
+                </li>
+                <li>
+                    <button id="playButtonBackwards">Play backwards</button>
+                </li>
+                <li>
+                    <button id="clearButton">Clear all masks</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+ 
+<script src="{{url_for('static', filename='main.js')}}"></script>
+<script src="{{url_for('static', filename='annotator.js')}}"></script>
+
+{% endblock %}
+

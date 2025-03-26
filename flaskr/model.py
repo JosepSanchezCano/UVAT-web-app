@@ -3,21 +3,21 @@ from ultralytics import SAM
 import cv2
 from memory_profiler import profile 
 # from xmem import Xmem
-from cutie_app import Cutie
+from .cutie_app import Cutie
 import torch
 import itertools
 import gc
 import glob
 from ctypes import *
 import os   
-import create_annotations
+from . import create_annotations
 import json
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 from datetime import datetime
 import math
 
-import msretinex
+# from . import msretinex
 
 from ultralytics import YOLO
 
@@ -58,6 +58,7 @@ class Video:
     def _loadVideo(self, path, directory = False):
         frames = []
         retinex = []
+        count = 0
         if directory:
             extensions = ('*.jpg')
             frames_paths = []
@@ -80,18 +81,24 @@ class Video:
         else:
 
             video = cv2.VideoCapture(path)
+            print(video)
+            count = 0
             while video.isOpened:
+                count += 1
                 read, frame = video.read()
+                # print(f"read: {read} frame: {frame}")
                 if not read:
                     break
                 frames.append(frame)
-                
+                cv2.imwrite(f"flaskr/static/temp_frames/frame_{count}.png",frame)
                 # ret = msretinex.mainRetinex(frame)
                 #print(f"the retinex image is: {ret}")
                 # retinex.append(ret)
             
         self.frames = frames
+        print(len(self.frames))
         self._setNFrames()
+
 
 
     """
@@ -331,9 +338,12 @@ class Model:
         self.video._setFrame(forward)
 
     #Función que añade un punto para SAM, asignandolo con un label donde 1 representa foreground y 0 representa background
-    def addPoint(self, point, label = 1):
+    def addPoint(self, point, label = 1, frame = 0):
 
-        key = self.video._getCurrentFrameNumber()
+        if frame != 0:
+            key = frame
+        else:
+            key = self.video._getCurrentFrameNumber()
 
         if key not in self.currentPoints:
             self.currentPoints[key] = []
@@ -353,7 +363,7 @@ class Model:
         if len(x) == len(y):
             temp = []
             for i in range(len(x)):
-                temp.append([x[i],y[i]])
+                temp.append([int(x[i]),int(y[i])])
             return temp
 
     #Función que corrige las máscaras adapatandolas a un formato de array con tuplas de coordenadas que forman el poligono de la máscara
@@ -369,17 +379,21 @@ class Model:
     #FUnción que devuelve los puntos de SAM para el frame que se esta visualizando
     def getPoints(self):
         if self.currentPoints:
-            if self.video._getCurrentFrameNumber() in self.currentPoints:
-                return self.currentPoints[self.video._getCurrentFrameNumber()]
+            print(f"currentFrame: {self.video._getCurrentFrameNumber()}")
+            if f'{self.video._getCurrentFrameNumber()}' in self.currentPoints:
+                return self.currentPoints[f'{self.video._getCurrentFrameNumber()}']
             
     #Función que para el frame que se esta visualizando devuelve las etiquetas de los puntos
     def getLabels(self):
         if self.labels:
             if self.video._getCurrentFrameNumber() in self.labels:
-                return self.labels[self.video._getCurrentFrameNumber()]
+                return self.labels[f'self.video._getCurrentFrameNumber()']
             
     #Función que aplica a la imagen actual SAM usando puntos o bounding boxes como input
-    def _applySAM(self, allImage = False):
+    def _applySAM(self, allImage = False, frame = 0):
+        if frame != 0:
+            self.video._setFrameN(frame)
+
         if not allImage:
             points = self.getPoints()
             labels = self.getLabels()
@@ -387,14 +401,17 @@ class Model:
             points = None
             labels = None
 
+        print(f"puntos: {points}")
+        # print(f"puntos: {self.currentPoints[f'{frame}']}")
+        # print(f"puntos: {len(self.video.frames)}")
         if not allImage and points:
         #Aplicamos el modelo
             masks = self.sam._applyPred(self.video._getCurrentFrame(), points = points, labels = labels, allImage=allImage)[0].masks.xy
             # print(masks)
             #Adaptamos el output al formato que más nos conviene
-            print(type(masks))
+            # print(type(masks))
             masks = self._correctMasks(masks)
-            print(type(masks))
+            # print(type(masks))
             #Obtenemos el número del frame actual para usar como llave en el diccionario
             key = self.video._getCurrentFrameNumber()
             
@@ -406,6 +423,9 @@ class Model:
                 self.masks[key].append(Mask(mask))
 
             self.fixMasks()
+            print("prediction done")
+            return self.masks[key]
+
 
     def _applyYOLO(self):
         #Aplicamos el modelo
@@ -424,6 +444,7 @@ class Model:
         print(coordinates)
 
         masks_from_bbox = self.sam._applyPred(self.video._getCurrentFrame(),bbox = coordinates)[0].masks.xy
+   
         # print(masks_from_bbox)
         print(type(masks_from_bbox))
         masks_from_bbox = self._correctMasks(masks_from_bbox)
@@ -445,6 +466,7 @@ class Model:
         self.fixMasks()
         
         self.yolo.unloadModel()
+        # return self.masks[]
     #Función que llama al objeto XMEM o similares para propagar las máscaras del frame actual al resto del video
     def propagate(self):
         #print(f"masks:\n{self.masks[self.video._getCurrentFrameNumber()][0].getMask()}")
@@ -552,6 +574,12 @@ class Model:
         if self.video._getCurrentFrameNumber() in self.masks:
             return self.masks[self.video._getCurrentFrameNumber()]
         
+    def getMasks(self):
+        return self.masks
+    
+    def getFrames(self):
+        return self.video.getFrames()
+
     def _generateMasks(self):
         pass
 
@@ -726,6 +754,33 @@ class Model:
                     self.setMask(aux_mask,p1)
                     #self.popMask(p2)
 
+    def addCorrectionToMask(self, maskIndex, maskToAdd):
+        if self.masks[self.video._getCurrentFrameNumber()]:
+            if maskIndex < len(self.masks[self.video._getCurrentFrameNumber()]):
+                mask = self.masks[self.video._getCurrentFrameNumber()][maskIndex]
+                print(f"Added mod in mask: {maskIndex}")
+
+                aux_image = np.zeros(self.getCurrentShape()[0:2])
+
+                print(np.array(mask.getMask()).astype(np.int32))
+                aux_image = cv2.fillPoly(aux_image, [np.array(mask.getMask()).astype(np.int32)], color = 1)
+                aux_image = cv2.fillPoly(aux_image, [np.array(maskToAdd).astype(np.int32)], color = 1)
+
+                # save image to disk
+ 
+
+                aux_image = (aux_image != 0).astype(np.uint8)
+                cv2.imwrite("mask.png", aux_image*255)
+                # cv2.imshow("Ven",aux_image*255)
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
+                aux_list = []
+                aux_list.append(aux_image)
+                list_of_points_mask = self._fromMask2Poly(aux_list,id = mask.getId())
+
+                aux_mask = Mask(list_of_points_mask[0][0],mask.getId())
+                
+                self.setMask(aux_mask,maskIndex)
 
     def addMaskMod(self, mod):
         if len(mod) > 3:
@@ -865,6 +920,9 @@ class Model:
         x_coor, y_coor = zip(*points)
 
         return min(x_coor),min(y_coor),max(x_coor), max(y_coor)
+    
+    def getNumFrames(self):
+        return len(self.video.getFrames())
 
     def obtain_subimages(self):
         annotation_id = 0
@@ -911,6 +969,8 @@ class Model:
             # print(image_annotations)
         coco_format["images"] = images
         coco_format["annotations"] = image_annotations
+
+        print(f"Directory: {os.getcwd()}")
 
         with open(f"output/ann_{time}.json", "w+") as outfile:
                 json.dump(coco_format, outfile, sort_keys=True, indent=4)
@@ -1021,3 +1081,10 @@ class Model:
                             else:
                                 self.fuseMasks(element,count, pos)
                                 continue
+
+
+    # generate a python function that will check all the masks in the array obtained by using self.getCurrentMasks() and will check if there are masks that have an IoU bigger than a certain threshold
+    # if the IoU is bigger than the threshold, the function will fuse the masks into one mask
+    # the function will return the new array of masks
+    # the function will be called fixMasks
+    

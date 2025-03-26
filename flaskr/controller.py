@@ -1,4 +1,4 @@
-from model import Model
+from .model import Model
 #from view import Vista
 
 class Controller:
@@ -23,21 +23,30 @@ class Controller:
 
     def _showFrame(self):
         return self.model._getFrame()
+    
+    def getFrames(self):
+        return self.model.getFrames()
        
     def _loadVideo(self,path,directory = False):
         self.model._loadVideo(path, directory)
 
-    def _addPoint(self, point, label):
-        self.model.addPoint(point,label)
+    def _addPoint(self, point, label=0, frame = 0):
+        self.model.addPoint(point,label, frame)
 
-    def applySAM(self, allImage = False):
-        return self.model._applySAM(allImage)
+    def applySAM(self, allImage = False, frame = 0):
+        return self.model._applySAM(allImage, frame)
     
     def getMasks(self):
         return self.model._getCurrentMasks()
 
+    def getAllMasks(self):
+        return self.model.getMasks()
+
     def getCurrentShape(self):
         return self.model.getCurrentShape()
+    
+    def getModel(self):
+        return self.model
     
     def pointsExist(self):
         return self.model.pointsExist()
@@ -71,12 +80,22 @@ class Controller:
     def load_ann(self, filePath):
         self.model.loadAnn(filePath)
 
+    def getNumFrames(self):
+        return self.model.getNumFrames()
+    
     def getSelectedMasks(self):
         if self.model.videoLoaded():
             return self.model.getSelectedMasks()
         else:
             return 0
     
+    def addCorrectionToMask(self, maskIndex, maskToAdd):
+        if self.model.videoLoaded():
+            self.model.addCorrectionToMask(maskIndex, maskToAdd)
+
+            return True
+        return False
+
     def addMaskMod(self, maskToAdd):
         if self.model.videoLoaded():
             self.model.addMaskMod(maskToAdd)

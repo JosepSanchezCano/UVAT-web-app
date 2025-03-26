@@ -24,7 +24,7 @@ import cv2
 from tqdm import tqdm
 
 import cv2
-from cutie.gui.interactive_utils import image_to_torch, torch_prob_to_numpy_mask, index_numpy_to_one_hot_torch, overlay_davis
+from .cutie.gui.interactive_utils import image_to_torch, torch_prob_to_numpy_mask, index_numpy_to_one_hot_torch, overlay_davis
 
 
 # default configuration
@@ -51,7 +51,7 @@ class Cutie:
             self.cfg = compose(config_name="eval_config")
 
             with open_dict(self.cfg):
-                self.cfg['weights'] = './weights/cutie-base-mega.pth'
+                self.cfg['weights'] = 'flaskr/weights/cutie-base-mega.pth'
 
             data_cfg = get_dataset_cfg(self.cfg)
 

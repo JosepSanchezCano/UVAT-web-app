@@ -5,6 +5,9 @@ from flask import (
 from flask import Flask
 from werkzeug.utils import secure_filename
 
+from . import controller
+
+
 UPLOAD_FOLDER = '/video_files/'
 
 
@@ -31,7 +34,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-
+    
 
     from . import db
     db.init_app(app)
@@ -42,6 +45,10 @@ def create_app(test_config=None):
     from . import blog
     app.register_blueprint(blog.bp)
     app.add_url_rule('/', endpoint='index')
+
+    #Object init
+    controllerAux = controller.Controller()
+    app.config['CONTROLLER'] = controllerAux
 
     return app
 
