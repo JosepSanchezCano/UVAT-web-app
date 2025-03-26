@@ -1,2 +1,9 @@
 video_files/
+<<<<<<< HEAD
+sam_b.pt
+flaskr/weights/
+temp_frames/
+flaskr/static/temp_frames/
+=======
 
+>>>>>>> d8cca31c67f01daddeb62e02afda4a6026cc3fa3
