@@ -8,12 +8,12 @@ The app is built using Flask as a framework to manage frontend requests to the b
 ## AI Models
 
 - **SAM (Segment Anything Model)** from Meta: Handles instance segmentation tasks.
-- **Cutie (VOS Model)**: Propagates the current masks throughout the video.
+- **Cutie (VOS Model)**: Propagates masks throughout the video.
 
 ## Features
 
 - Upload videos (up to 5 minutes)
-- Save annotations locally in COCO and mask format
+- Save annotations locally in COCO mask format
 - Instance segmentation using point-based input
 - Video object propagation (100 frames at a time)
 - Frame-by-frame visualization

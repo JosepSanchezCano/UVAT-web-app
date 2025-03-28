@@ -47,11 +47,10 @@ function readyToPlayVideo(event){ // this is a referance to the video
                          canvas.width / this.videoWidth, 
                          canvas.height / this.videoHeight); 
     videoContainer.ready = true;
-    createPointData();
-    loadVideo();
+     
     // the video can be played so hand it off to the display function
-
-
+    requestAnimationFrame(updateCanvas);
+    createPointData();
     // add instruction
     // document.getElementById("playPause").textContent = "Click video to play/pause.";
     // document.querySelector(".mute").textContent = "Mute";
@@ -64,14 +63,14 @@ function calcularFrameActual(video) {
 
 function stepForward() {
   video.pause();
-  currentFrame += 1// Adjust for video frame rate
+  video.currentTime += 1 / fps; // Adjust for video frame rate
   video.addEventListener("seeked", updateCanvas, { once: true });
 }
 
 
 function stepBackward() {
   video.pause();
-  currentFrame += 1 // Adjust for video frame rate
+  video.currentTime -= 1 / fps; // Adjust for video frame rate
   video.addEventListener("seeked", updateCanvas, { once: true });
 }
 
@@ -81,57 +80,70 @@ function loadVideo(){
   console.log("loading video")
   console.log(videoFrames)
   ctx.drawImage(videoFrames[0], 0, 0, 1200, 800);
-  requestAnimationFrame(updateCanvas);
   }
-function updateCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // only draw if loaded and ready
-  console.log("updating canvas before conditional")
-  if (videoContainer !== undefined && videoContainer.ready) {
-    console.log("updating canvas")
-    var scale = videoContainer.scale;
-    var vidH = videoContainer.video.videoHeight;
-    var vidW = videoContainer.video.videoWidth;
-    var top = 0;
-    var left = 0;
+function updateCanvas(){
+    ctx.clearRect(0,0,canvas.width,canvas.height); 
+    // only draw if loaded and ready
+    if(videoContainer !== undefined && videoContainer.ready){ 
+        // // find the top left of the video on the canvas
+        // // video.muted = muted;
+        // var scale = videoContainer.scale;
+        // var vidH = videoContainer.video.videoHeight;
+        // var vidW = videoContainer.video.videoWidth;
+        // // var top = canvas.height / 2 - (vidH /2 ) * scale;
+        // // var left = canvas.width / 2 - (vidW /2 ) * scale;
+        // var top = 0;
+        // var left= 0;
+        // now just draw the video the correct size
 
-    // Draw the current frame from videoFrames
-    if (videoFrames.length > 0 && currentFrame < videoFrames.length) {
-      ctx.drawImage(videoFrames[currentFrame], left, top, vidW * scale, vidH * scale);
+        
+
+
+        ctx.drawImage(videoContainer.video, left, top, vidW * scale, vidH * scale);
+        // currentFrame = calcularFrameActual(videoContainer.video)
+        // console.log(currentFrame)
+        drawnVideoSize = [Math.floor(vidW * scale), Math.floor(vidH * scale)]
+        verticalPadding = Math.floor((canvas.height - (vidH * scale)) / 2)
+        drawMasks()
+        if(puntos[currentFrame].length > 0){
+          console.log("checking points")
+          drawPoints(ctx)
+          
+        }
+
+        if(playNextFrame){
+          if(counter == 0){  
+            counter += 1
+          }else{
+            videoContainer.video.pause()
+            playNextFrame=false
+            counter = 0  
+          }
+        }
+        // if(videoContainer.video.paused){ // if not playing show the paused screen 
+        //     drawPayIcon();
+        // }
+
     }
-
-    drawnVideoSize = [Math.floor(vidW * scale), Math.floor(vidH * scale)];
-    verticalPadding = Math.floor((canvas.height - (vidH * scale)) / 2);
-    drawMasks();
-
-    if (puntos[currentFrame].length > 0) {
-      console.log("checking points");
-      drawPoints(ctx);
-    }
-
-    if (playNextFrame) {
-      if (counter == 0) {
-        counter += 1;
-      } else {
-        videoContainer.video.pause();
-        playNextFrame = false;
-        counter = 0;
-      }
-    }
-  }
-
-  // Update the current frame and request the next frame
-  setTimeout(() => {
+    // all done for display 
+    // request the next frame in 1/60th of a second
+    // // console.log("Requesting frame")
+    setTimeout(() => {
+      if((!videoContainer.video.paused && !videoContainer.video.ended )){
+        if (playingForward){
+          requestAnimationFrame(updateCanvas);
   
-    if (playingForward) {
-      currentFrame = (currentFrame + 1) % videoFrames.length;
-      requestAnimationFrame(updateCanvas);
-    } else {
-      currentFrame = (currentFrame - 1 + videoFrames.length) % videoFrames.length;
-      requestAnimationFrame(updateCanvas);
-    }
-    
-  }, 1000 / fps);
+        }else{
+          video.currentTime -= 1 / fps; 
+          requestAnimationFrame(updateCanvas);
+        }
+
+      }
+    }, 1000 / fps);
+
+
+
+    // requestAnimationFrame(updateCanvas);
 }
 
 function clearAllMasks(){
