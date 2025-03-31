@@ -218,7 +218,7 @@ def apply_cutie():
     if request.method == "POST":
         print("Cutie applying")
         valores = request.form
-        verticalPadding = int(valores["vPad"])
+
         dstRes = (int(valores["crW"]),int(valores["crH"]))
         srcRes = (int(valores["vrW"]),int(valores["vrH"]))
 
@@ -233,12 +233,12 @@ def apply_cutie():
 
         for key, masks in all_current_masks.items():
             for mask in masks:
-                if (key+1) in dictMasks:
-                    dictMasks[key+1].append(mask.getMask())
+                if (key) in dictMasks:
+                    dictMasks[key].append(mask.getMask())
                 else:
-                    dictMasks[key+1] = [mask.getMask()]
+                    dictMasks[key] = [mask.getMask()]
 
-        dictMasks = scale_points(dictMasks, srcRes, dstRes, (0,0,0,verticalPadding/2))
+        dictMasks = scale_points(dictMasks, srcRes, dstRes, (0,0,0,0))
         return jsonify(dictMasks)
 
 

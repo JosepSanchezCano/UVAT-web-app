@@ -21,6 +21,8 @@ var videoFrames = Array()
 
 var drawnVideoSize = (0,0)
 var playingForward = true
+var playing = false
+
 
 video.autoPlay = false; // ensure that the video does not auto play
 video.loop = false; // set the video to loop.
@@ -30,6 +32,11 @@ videoContainer = {  // we will add properties as needed
 };
 var verticalPadding = 0
 ctx.fillStyle = "black"
+
+var scale = 0;
+var vidH  = 0;
+var vidW  = 0;
+
 
 // To handle errors. This is not part of the example at the moment. Just fixing for Edge that did not like the ogv format video
 video.onerror = function(e){
@@ -49,6 +56,7 @@ function readyToPlayVideo(event){ // this is a referance to the video
     videoContainer.ready = true;
     createPointData();
     loadVideo();
+
     // the video can be played so hand it off to the display function
 
 
@@ -63,16 +71,18 @@ function calcularFrameActual(video) {
 }
 
 function stepForward() {
-  video.pause();
+  playing = false;
   currentFrame += 1// Adjust for video frame rate
-  video.addEventListener("seeked", updateCanvas, { once: true });
+  // video.addEventListener("seeked", updateCanvas, { once: true });
+  requestAnimationFrame(updateCanvas);
 }
 
 
 function stepBackward() {
-  video.pause();
-  currentFrame += 1 // Adjust for video frame rate
+  playing = false;
+  currentFrame -= 1 // Adjust for video frame rate
   video.addEventListener("seeked", updateCanvas, { once: true });
+  requestAnimationFrame(updateCanvas);
 }
 
 
@@ -83,20 +93,22 @@ function loadVideo(){
   ctx.drawImage(videoFrames[0], 0, 0, 1200, 800);
   requestAnimationFrame(updateCanvas);
   }
+
 function updateCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // only draw if loaded and ready
-  console.log("updating canvas before conditional")
+  // console.log("updating canvas before conditional")
+  console.log(playing)
   if (videoContainer !== undefined && videoContainer.ready) {
-    console.log("updating canvas")
-    var scale = videoContainer.scale;
-    var vidH = videoContainer.video.videoHeight;
-    var vidW = videoContainer.video.videoWidth;
-    var top = 0;
-    var left = 0;
-
+    // console.log("updating canvas")
+    var top   = 0;
+    var left  = 0;
+    scale = videoContainer.scale;
+    vidH = videoContainer.video.videoHeight;
+    vidW = videoContainer.video.videoWidth;
     // Draw the current frame from videoFrames
     if (videoFrames.length > 0 && currentFrame < videoFrames.length) {
+      // console.log("drawing video frame")
       ctx.drawImage(videoFrames[currentFrame], left, top, vidW * scale, vidH * scale);
     }
 
@@ -105,31 +117,33 @@ function updateCanvas() {
     drawMasks();
 
     if (puntos[currentFrame].length > 0) {
-      console.log("checking points");
+      // console.log("checking points");
       drawPoints(ctx);
     }
 
-    if (playNextFrame) {
-      if (counter == 0) {
-        counter += 1;
-      } else {
-        videoContainer.video.pause();
-        playNextFrame = false;
-        counter = 0;
-      }
-    }
+    // if (playNextFrame) {
+    //   if (counter == 0) {
+    //     counter += 1;
+    //   } else {
+    //     videoContainer.video.pause();
+    //     playNextFrame = false;
+    //     counter = 0;
+    //   }
+    // }
   }
 
   // Update the current frame and request the next frame
   setTimeout(() => {
-  
-    if (playingForward) {
-      currentFrame = (currentFrame + 1) % videoFrames.length;
-      requestAnimationFrame(updateCanvas);
-    } else {
-      currentFrame = (currentFrame - 1 + videoFrames.length) % videoFrames.length;
-      requestAnimationFrame(updateCanvas);
+    if (playing){
+      if (playingForward) {
+        currentFrame = (currentFrame + 1) % videoFrames.length;
+        requestAnimationFrame(updateCanvas);
+      } else {
+        currentFrame = (currentFrame - 1 + videoFrames.length) % videoFrames.length;
+        requestAnimationFrame(updateCanvas);
+      }
     }
+    
     
   }, 1000 / fps);
 }
@@ -183,15 +197,20 @@ function drawPayIcon(){
 
 function playPauseClick(){
   playingForward = true
-     if(videoContainer !== undefined && videoContainer.ready){
-          if(videoContainer.video.paused){                                 
+     if(currentFrame < videoFrames.length){
+          if(!playing){                                 
                 // videoContainer.video.play();
+                playing = true;
                 document.querySelector("#playButton").innerHTML = "Pause"
                 requestAnimationFrame(updateCanvas);
+                
           }else{
+                playing = false;
                 videoContainer.video.pause();
                 document.querySelector("#playButton").innerHTML = "Play"
           }
+     }else{
+      playing = false;
      }
 }
 
@@ -356,7 +375,7 @@ function dibujarPoligonos(poligonos) {
 }
 
 function addMasksToMainArray(masks,frameIndex=0){
-  currentFrameAux = getFrameNumberActual()
+  currentFrameAux = currentFrame
   if (frameIndex != 0){
     if (!(frameIndex in all_masks)){
       all_masks[frameIndex] = new Array()
@@ -378,8 +397,8 @@ function addMasksToMainArray(masks,frameIndex=0){
 
 function drawMasks(){
 
-  if (getFrameNumberActual() in all_masks){
-    masks = all_masks[getFrameNumberActual()];
+  if (currentFrame in all_masks){
+    masks = all_masks[currentFrame];
     console.log("dibujando");
     console.log(masks);
     masks.forEach(dibujarPoligonos);
@@ -527,11 +546,11 @@ $("#apply_sam").on('submit',function (e) {
   e.preventDefault();
 
   var videoRes = [videoContainer.video.videoWidth,videoContainer.video.videoHeight]
-  currentFrame = calcularFrameActual(videoContainer.video)
+  currentFrameAux = currentFrame
   $.ajax({
   url:"/apply_sam",
   type:"POST",
-  data: {puntos:JSON.stringify(puntos), current_frame:currentFrame, vPad:verticalPadding, vrW:videoRes[0], vrH:videoRes[1], crW:drawnVideoSize[0],crH:drawnVideoSize[1]},
+  data: {puntos:JSON.stringify(puntos), current_frame:currentFrameAux, vPad:verticalPadding, vrW:videoRes[0], vrH:videoRes[1], crW:drawnVideoSize[0],crH:drawnVideoSize[1]},
   success: function(response){
       masks = treat_masks(response);
       addMasksToMainArray(masks)
