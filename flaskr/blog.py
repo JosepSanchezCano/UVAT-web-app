@@ -317,3 +317,10 @@ def get_frames():
             frames.append(frame_base64)
 
         return jsonify(frames=frames)
+    
+@bp.route('/clear_frame_masks', methods=['GET', 'POST'])
+def clear_frame_masks():
+    if request.method == 'POST':
+        current_app.config["CONTROLLER"].clearSingleFrame()
+        return jsonify({'status': 'success'})
+    return jsonify({'status': 'error'})

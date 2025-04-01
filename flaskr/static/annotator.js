@@ -164,6 +164,20 @@ function clearAllMasks(){
     });
 }
 
+function clearButtonFrame(){
+  $.ajax({
+    url:"/clear_frame_masks",
+    type:"POST",
+    data: {frame:currentFrame},
+    success: function(response){
+      all_masks[currentFrame] = []
+    },
+    error: function(error){
+      console.log(error);
+    },
+    });
+} 
+
 function saveAnnotations(){
   $.ajax({
     url:"/save_ann",
@@ -307,6 +321,7 @@ canvas.addEventListener("click", handleCanvasEvents);
 document.getElementById("playButton").addEventListener("click",playPauseClick);
 document.getElementById("playButtonBackwards").addEventListener("click",playBackwards);
 document.getElementById("clearButton").addEventListener("click",clearAllMasks);
+document.getElementById("clearButtonFrame").addEventListener("click",clearButtonFrame);
 document.getElementById("saveAnn").addEventListener("click",saveAnnotations);
 // document.querySelector(".mute").addEventListener("click",videoMute)
 
