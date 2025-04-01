@@ -426,6 +426,11 @@ class Model:
             print("prediction done")
             return self.masks[key]
 
+    def addCustomMask(self, mask, currentFrame):
+        if currentFrame not in self.masks:
+            self.masks[currentFrame] = []
+
+        self.masks[currentFrame].append(Mask(mask))
 
     def _applyYOLO(self):
         #Aplicamos el modelo
@@ -614,9 +619,12 @@ class Model:
         Mask.resetSelectedMasks()
         
     #Función que limpia los puntos, etiquetas y máscaras del frame actual
-    def clearSingleFrame(self):
-        currentFrame = self.video._getCurrentFrameNumber()
-        
+    def clearSingleFrame(self, exactFrameNumber = -1):
+        if exactFrameNumber != -1:
+            currentFrame = exactFrameNumber
+        else:
+            currentFrame = self.video._getCurrentFrameNumber()
+            
         self.currentPoints[currentFrame] = []
         self.labels[currentFrame] = []
         self.masks[currentFrame] = []

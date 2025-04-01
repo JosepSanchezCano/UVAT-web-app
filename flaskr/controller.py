@@ -62,9 +62,11 @@ class Controller:
     def clearAll(self):
         self.model.clearAll()
 
-    def clearSingleFrame(self):
-        self.model.clearSingleFrame()
+    def clearSingleFrame(self, extactFrameNumber = -1):
+        self.model.clearSingleFrame(extactFrameNumber)
         
+
+
     def propagate(self):
         self.model.propagate()
 
@@ -89,6 +91,12 @@ class Controller:
         else:
             return 0
     
+    def addCustomMask(self, maskToAdd):
+        if self.model.videoLoaded():
+            self.model.addCustomMask(maskToAdd)
+            return True
+        return False
+
     def addCorrectionToMask(self, maskIndex, maskToAdd):
         if self.model.videoLoaded():
             self.model.addCorrectionToMask(maskIndex, maskToAdd)

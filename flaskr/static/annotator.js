@@ -156,6 +156,7 @@ function clearAllMasks(){
     data: {},
     success: function(response){
       all_masks = []
+      requestAnimationFrame(updateCanvas);
     },
     error: function(error){
       console.log(error);
@@ -171,6 +172,7 @@ function clearButtonFrame(){
     data: {frame:currentFrame},
     success: function(response){
       all_masks[currentFrame] = []
+      requestAnimationFrame(updateCanvas);
     },
     error: function(error){
       console.log(error);
@@ -432,6 +434,13 @@ function addCorrectionToBackend(auxiliarCorrectionPoints){
 
 }
 
+function addNewMaskToBackend(auxiliarNewMaskPoints){
+  if (auxiliarNewMaskPoints.length > 0){
+    addPointsToMaskAjaxRequest(auxiliarNewMaskPoints)
+  }
+  auxiliarNewMaskPoints = Array()
+} 
+
 // const listaDePoligonos = [
 //   // Triángulo
 //   [[100, 100], [150, 50], [200, 100]],
@@ -447,6 +456,9 @@ function addCorrectionToBackend(auxiliarCorrectionPoints){
 // Event helpers
 
 auxiliarCorrectionPoints = Array()
+auxiliarNewMaskPoints = Array()
+
+let maskOrCorrection = false;
 
 const startStroke = point => {
   drawing = true;
@@ -462,7 +474,11 @@ const mouseMove = evt => {
   if (!drawing) {
       return;
   }
-  auxiliarCorrectionPoints.push([evt.offsetX, evt.offsetY]);
+  if (maskOrCorrection){
+    auxiliarNewMaskPoints.push([evt.offsetX, evt.offsetY]);
+  }else{
+    auxiliarCorrectionPoints.push([evt.offsetX, evt.offsetY]);
+  }
   continueStroke([evt.offsetX, evt.offsetY]);
   // console.log([evt.offsetX, evt.offsetY])
 };
@@ -474,7 +490,11 @@ const mouseDown = evt => {
   }
     evt.preventDefault();
     canvas.addEventListener("mousemove", mouseMove, false);
-    auxiliarCorrectionPoints.push([evt.offsetX, evt.offsetY]);
+    if (maskOrCorrection){
+      auxiliarNewMaskPoints.push([evt.offsetX, evt.offsetY]);
+    }else{
+      auxiliarCorrectionPoints.push([evt.offsetX, evt.offsetY]);
+    }
     startStroke([evt.offsetX, evt.offsetY]);
     // console.log([evt.offsetX, evt.offsetY])
   }
@@ -634,10 +654,10 @@ $("#apply_cutie").on('submit',function (e) {
 
 // generate a function that create an ajax request to the server that send a list of points to add to the currently selected mask
 function addPointsToMaskAjaxRequest(maskIndex, points){
-  console.log("Adding points to mask, backend request")
-  console.log(maskIndex)
-  console.log("maskIndex above, points below")
-  console.log(points)
+  // console.log("Adding points to mask, backend request")
+  // console.log(maskIndex)
+  // console.log("maskIndex above, points below")
+  // console.log(points)
   var videoRes = [videoContainer.video.videoWidth,videoContainer.video.videoHeight]
   $.ajax({
     url:"/add_points_to_mask",
@@ -653,6 +673,25 @@ function addPointsToMaskAjaxRequest(maskIndex, points){
   
     });
 }
+
+function addMaskAjaxRequest(points){
+  let videoRes = [videoContainer.video.videoWidth,videoContainer.video.videoHeight];
+  $.ajax({
+    url:"/add_mask",
+    type:"POST",
+    data: {maskToAdd:JSON.stringify(points),frame:currentFrame, vrW:videoRes[0], vrH:videoRes[1], crW:drawnVideoSize[0],crH:drawnVideoSize[1]},
+    success: function(response){
+      console.log(response)
+      getMasksAjaxRequest()
+    },
+    error: function(error){
+      console.log(error);
+    },
+  
+    });
+
+}
+
 
 // generate a function that create an ajax request to the server that asks for all the masks to be sent to the frontend and then clean the current masks and add the new ones
 function getMasksAjaxRequest(){

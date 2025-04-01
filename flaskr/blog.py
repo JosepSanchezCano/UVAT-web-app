@@ -272,6 +272,19 @@ def add_points_to_mask():
         current_app.config["CONTROLLER"].addCorrectionToMask(int(valores["maskIndex"]),scale_points_list(maskToAdd, srcRes, dstRes, (0,0,0,0)))
         temp = {'1':1}
         return jsonify(temp)
+    
+@bp.route("/add_mask", methods=["GET","POST"])
+def add_mask():
+    if request.method == "POST":
+        valores = request.form
+        srcRes = (int(valores["crW"]),int(valores["crH"]))
+        dstRes = (int(valores["vrW"]),int(valores["vrH"]))
+        currentFrame = valores["current_frame"]
+        maskToAdd = json.loads(valores["maskToAdd"])
+        
+        current_app.config["CONTROLLER"].addCustomMask(scale_points_list(maskToAdd,srcRes,dstRes, (0,0,0,0)),int(currentFrame))
+        temp = {'1':1}
+        return jsonify(temp)
 
 @bp.route("/get_masks", methods=["GET","POST"])
 def get_masks():
@@ -320,7 +333,9 @@ def get_frames():
     
 @bp.route('/clear_frame_masks', methods=['GET', 'POST'])
 def clear_frame_masks():
+    valores = request.form
+    currentFrame = valores['frame']
     if request.method == 'POST':
-        current_app.config["CONTROLLER"].clearSingleFrame()
+        current_app.config["CONTROLLER"].clearSingleFrame(currentFrame)
         return jsonify({'status': 'success'})
     return jsonify({'status': 'error'})
