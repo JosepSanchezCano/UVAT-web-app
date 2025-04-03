@@ -97,9 +97,9 @@ class Controller:
             return True
         return False
 
-    def addCorrectionToMask(self, maskIndex, maskToAdd):
+    def addCorrectionToMask(self, maskIndex, maskToAdd,frame = -1):
         if self.model.videoLoaded():
-            self.model.addCorrectionToMask(maskIndex, maskToAdd)
+            self.model.addCorrectionToMask(maskIndex, maskToAdd, frame)
 
             return True
         return False

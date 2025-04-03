@@ -762,33 +762,33 @@ class Model:
                     self.setMask(aux_mask,p1)
                     #self.popMask(p2)
 
-    def addCorrectionToMask(self, maskIndex, maskToAdd):
-        if self.masks[self.video._getCurrentFrameNumber()]:
-            if maskIndex < len(self.masks[self.video._getCurrentFrameNumber()]):
-                mask = self.masks[self.video._getCurrentFrameNumber()][maskIndex]
-                print(f"Added mod in mask: {maskIndex}")
+    def addCorrectionToMask(self, maskIndex, maskToAdd, frame = -1):
+        if frame != -1:
+            if self.masks[frame]:
+                if maskIndex < len(self.masks[frame]):
+                    mask = self.masks[frame][maskIndex]
+                    print(f"Added mod in mask: {maskIndex}")
 
-                aux_image = np.zeros(self.getCurrentShape()[0:2])
+                    aux_image = np.zeros(self.getCurrentShape()[0:2])
 
-                print(np.array(mask.getMask()).astype(np.int32))
-                aux_image = cv2.fillPoly(aux_image, [np.array(mask.getMask()).astype(np.int32)], color = 1)
-                aux_image = cv2.fillPoly(aux_image, [np.array(maskToAdd).astype(np.int32)], color = 1)
+                    print(np.array(mask.getMask()).astype(np.int32))
+                    aux_image = cv2.fillPoly(aux_image, [np.array(mask.getMask()).astype(np.int32)], color = 1)
+                    aux_image = cv2.fillPoly(aux_image, [np.array(maskToAdd).astype(np.int32)], color = 1)
 
-                # save image to disk
- 
+                    # save image to disk
+    
 
-                aux_image = (aux_image != 0).astype(np.uint8)
-                cv2.imwrite("mask.png", aux_image*255)
-                # cv2.imshow("Ven",aux_image*255)
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
-                aux_list = []
-                aux_list.append(aux_image)
-                list_of_points_mask = self._fromMask2Poly(aux_list,id = mask.getId())
+                    aux_image = (aux_image != 0).astype(np.uint8)
+                    cv2.imwrite("mask.png", aux_image*255)
 
-                aux_mask = Mask(list_of_points_mask[0][0],mask.getId())
-                
-                self.setMask(aux_mask,maskIndex)
+                    aux_list = []
+                    aux_list.append(aux_image)
+                    list_of_points_mask = self._fromMask2Poly(aux_list,id = mask.getId())
+
+                    aux_mask = Mask(list_of_points_mask[0][0],mask.getId())
+                    
+                    self.setMask(aux_mask,maskIndex,posFrame=frame)
+                    self.fixMasks()
 
     def addMaskMod(self, mod):
         if len(mod) > 3:

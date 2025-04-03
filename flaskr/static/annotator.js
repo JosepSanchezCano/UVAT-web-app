@@ -1,7 +1,8 @@
 const modosAnotador = {
   MODELO: "MODELO",
-  CORRECION: "CORRECION"
-}
+  CORRECION: "CORRECION",
+  ADDING: "ADDING"
+};
 
 // Variables del anotador
 var modo = modosAnotador.MODELO
@@ -255,14 +256,19 @@ function nextFrame(){
 }
 
 function getFrameNumberActual(){
-  return calcularFrameActual(videoContainer.video)
+  return currentFrame
 }
 
-function changeModo(){
-  if (modo === modosAnotador.CORRECION){
-    modo = modosAnotador.MODELO
-  }else if(modo === modosAnotador.MODELO){
-    modo = modosAnotador.CORRECION
+function changeModo() {
+  if (modo === modosAnotador.CORRECION) {
+    modo = modosAnotador.MODELO;
+    document.getElementById("changeModo").innerText = "Add Mask";
+  } else if (modo === modosAnotador.MODELO) {
+    modo = modosAnotador.ADDING;
+    document.getElementById("changeModo").innerText = "Correcion";
+  } else if (modo === modosAnotador.ADDING) {
+    modo = modosAnotador.CORRECION;
+    document.getElementById("changeModo").innerText = "Modelo";
   }
 }
 
@@ -325,6 +331,7 @@ document.getElementById("playButtonBackwards").addEventListener("click",playBack
 document.getElementById("clearButton").addEventListener("click",clearAllMasks);
 document.getElementById("clearButtonFrame").addEventListener("click",clearButtonFrame);
 document.getElementById("saveAnn").addEventListener("click",saveAnnotations);
+document.getElementById("addMask").addEventListener("click",addNewMaskToBackend);
 // document.querySelector(".mute").addEventListener("click",videoMute)
 
 document.getElementById("nextFrame").addEventListener("click",stepForward)
@@ -427,18 +434,23 @@ function drawMasks(){
 
 function addCorrectionToBackend(auxiliarCorrectionPoints){
   if (auxiliarCorrectionPoints.length > 0){
+    console.log("Adding correction to backend")
     maskIndex = checkClosestMask(auxiliarCorrectionPoints)
     addPointsToMaskAjaxRequest(maskIndex,auxiliarCorrectionPoints)
+
   }
-  auxiliarCorrectionPoints = Array()
+
 
 }
 
-function addNewMaskToBackend(auxiliarNewMaskPoints){
+function addNewMaskToBackend(){
+  console.log("Adding new mask to backend")
   if (auxiliarNewMaskPoints.length > 0){
+    console.log("Adding new mask to backend after conditional")
     addPointsToMaskAjaxRequest(auxiliarNewMaskPoints)
   }
   auxiliarNewMaskPoints = Array()
+
 } 
 
 // const listaDePoligonos = [
@@ -484,7 +496,7 @@ const mouseMove = evt => {
 };
 
 const mouseDown = evt => {
-  if (modo === modosAnotador.CORRECION){
+  if (modo === modosAnotador.CORRECION || modo === modosAnotador.ADDING){
     if (drawing) {
       return;
   }
@@ -529,8 +541,8 @@ function checkClosestMask(polygon){
 
   let minDistance = Infinity
   let maskIndex = -1
-  for (let i = 0; i < all_masks[getFrameNumberActual()].length; i++){
-    let mask = all_masks[getFrameNumberActual()][i]
+  for (let i = 0; i < all_masks[currentFrame].length; i++){
+    let mask = all_masks[currentFrame][i]
     let distance = calculatePolygonDistance(mask[0],polygon)
     console.log(distance);
     if (distance < minDistance){
@@ -662,9 +674,10 @@ function addPointsToMaskAjaxRequest(maskIndex, points){
   $.ajax({
     url:"/add_points_to_mask",
     type:"POST",
-    data: {maskIndex:maskIndex, maskToAdd:JSON.stringify(points), vrW:videoRes[0], vrH:videoRes[1], crW:drawnVideoSize[0],crH:drawnVideoSize[1]},
+    data: {frame:currentFrame,maskIndex:maskIndex, maskToAdd:JSON.stringify(points), vrW:videoRes[0], vrH:videoRes[1], crW:drawnVideoSize[0],crH:drawnVideoSize[1]},
     success: function(response){
       console.log(response)
+      auxiliarCorrectionPoints = Array()
       getMasksAjaxRequest()
     },
     error: function(error){
@@ -706,8 +719,6 @@ function getMasksAjaxRequest(){
       console.log(masks_cutie)      
 
       for(let key in masks_cutie){
-        console.log("adding masks cutie")
-        console.log(key)
         temp_masks = treat_masks(masks_cutie[key])
         console.log(temp_masks)
         addMasksToMainArray(masks_cutie[key],key)

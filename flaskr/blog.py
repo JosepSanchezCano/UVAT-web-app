@@ -264,12 +264,10 @@ def add_points_to_mask():
         valores = request.form
         srcRes = (int(valores["crW"]),int(valores["crH"]))
         dstRes = (int(valores["vrW"]),int(valores["vrH"]))
-
-        print(valores)
+        currentFrame = valores["frame"]
         maskToAdd = json.loads(valores["maskToAdd"])
-        print(type(maskToAdd))
-        print(maskToAdd)
-        current_app.config["CONTROLLER"].addCorrectionToMask(int(valores["maskIndex"]),scale_points_list(maskToAdd, srcRes, dstRes, (0,0,0,0)))
+
+        current_app.config["CONTROLLER"].addCorrectionToMask(int(valores["maskIndex"]),scale_points_list(maskToAdd, srcRes, dstRes, (0,0,0,0)),int(currentFrame))
         temp = {'1':1}
         return jsonify(temp)
     
@@ -283,6 +281,7 @@ def add_mask():
         maskToAdd = json.loads(valores["maskToAdd"])
         
         current_app.config["CONTROLLER"].addCustomMask(scale_points_list(maskToAdd,srcRes,dstRes, (0,0,0,0)),int(currentFrame))
+
         temp = {'1':1}
         return jsonify(temp)
 
@@ -299,10 +298,10 @@ def get_masks():
 
         for key, masks in all_current_masks.items():
             for mask in masks:
-                if (key+1) in dictMasks:
-                    dictMasks[key+1].append(mask.getMask())
+                if (key) in dictMasks:
+                    dictMasks[key].append(mask.getMask())
                 else:
-                    dictMasks[key+1] = [mask.getMask()]
+                    dictMasks[key] = [mask.getMask()]
 
         dictMasks = scale_points(dictMasks, srcRes, dstRes, (0,0,0,0))
         return jsonify(dictMasks)
