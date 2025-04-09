@@ -91,9 +91,9 @@ class Controller:
         else:
             return 0
     
-    def addCustomMask(self, maskToAdd):
+    def addCustomMask(self, maskToAdd, frame):
         if self.model.videoLoaded():
-            self.model.addCustomMask(maskToAdd)
+            self.model.addCustomMask(maskToAdd, frame)
             return True
         return False
 

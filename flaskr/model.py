@@ -327,6 +327,7 @@ class Model:
     #Función que carga el video, generando un objeto de la clase video y que fija el número máximo de frames
     def _loadVideo(self, path, directory=False):
         self.video = Video(path, directory)
+        print("Video loaded")
         self._setMaxFrames()
 
     #Función que fija el número de frames máximo en función del video
@@ -430,6 +431,10 @@ class Model:
         if currentFrame not in self.masks:
             self.masks[currentFrame] = []
 
+
+        # if self.video == None:
+        #     self._loadVideo 
+        self.video._setFrameN(currentFrame)
         self.masks[currentFrame].append(Mask(mask))
 
     def _applyYOLO(self):

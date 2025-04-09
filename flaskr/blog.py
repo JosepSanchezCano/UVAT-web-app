@@ -47,7 +47,7 @@ def index():
     return render_template('blog/index.html')
 
 def allowed_file(filename):
-    print(filename)
+    # print(filename)
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -55,7 +55,7 @@ def allowed_file(filename):
 @bp.route("/video_feed", methods=['GET','POST'])
 def video_feed():
     if request.method == 'POST':
-        print(request.files)
+        # print(request.files)
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
@@ -67,7 +67,7 @@ def video_feed():
         
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            print(filename)
+            # print(filename)
             global current_video_path
             filepath = os.path.join('video_files/',filename)
             
@@ -75,7 +75,7 @@ def video_feed():
             current_app.config["CONTROLLER"]._loadVideo(temp)
             current_video_path = os.path.join(os.getcwd(),temp)
             file.save(current_video_path)
-            print(current_video_path)
+            # print(current_video_path)
             fps = get_fps_opencv(filepath)
 
             numFrames = current_app.config["CONTROLLER"].getNumFrames()
@@ -160,9 +160,9 @@ def scale_points(data, input_res, output_res, padding=(0, 0, 0, 0)):
     scaled_data = {}
     # print(data.items())
     for key, points in data.items():
-        print(points)
-        print(points[0])
-        print(f"key: {key}")
+        # print(points)
+        # print(points[0])
+        # print(f"key: {key}")
         scaled_data[key] = []
         for mask in points:
             scaled_data[key].append([(pad_left + x * scale_x, pad_top + y * scale_y) for x, y in mask])
@@ -180,7 +180,7 @@ def apply_sam():
         actual_frame = valores["current_frame"]
         verticalPadding = int(valores["vPad"])
         puntos = json.loads(valores["puntos"])
-        print(valores)
+        # print(valores)
 
         srcRes = (int(valores["crW"]),int(valores["crH"]))
         dstRes = (int(valores["vrW"]),int(valores["vrH"]))
@@ -195,7 +195,7 @@ def apply_sam():
                         # vertical_point = math.floor((point[1]-int(verticalPadding)) * (1+scale))
                         # horizontal_point = math.floor(point[0] * (1+scale))
                         new_point = convert_coordinates(point[0],point[1],srcRes,dstRes,(0,0,0,0))
-                        print(f"new point : {new_point}")
+                        # print(f"new point : {new_point}")
                         current_app.config["CONTROLLER"]._addPoint(new_point, 0, str(int(actual_frame)))
 
         # model_points = current_app.config["CONTROLLER"].getPoints()
@@ -216,7 +216,7 @@ def apply_sam():
 @bp.route("/apply_cutie", methods=["GET","POST"])
 def apply_cutie():
     if request.method == "POST":
-        print("Cutie applying")
+        # print("Cutie applying")
         valores = request.form
 
         dstRes = (int(valores["crW"]),int(valores["crH"]))
@@ -225,8 +225,8 @@ def apply_cutie():
         current_app.config["CONTROLLER"].propagate()
         all_current_masks = current_app.config["CONTROLLER"].getAllMasks()
 
-        print(f"masks structure: {all_current_masks}")
-        print(f"masks typing: {type(all_current_masks)}")
+        # print(f"masks structure: {all_current_masks}")
+        # print(f"masks typing: {type(all_current_masks)}")
 
 
         dictMasks = {}
@@ -277,7 +277,7 @@ def add_mask():
         valores = request.form
         srcRes = (int(valores["crW"]),int(valores["crH"]))
         dstRes = (int(valores["vrW"]),int(valores["vrH"]))
-        currentFrame = valores["current_frame"]
+        currentFrame = valores["frame"]
         maskToAdd = json.loads(valores["maskToAdd"])
         
         current_app.config["CONTROLLER"].addCustomMask(scale_points_list(maskToAdd,srcRes,dstRes, (0,0,0,0)),int(currentFrame))
@@ -289,8 +289,8 @@ def add_mask():
 def get_masks():
     if request.method == "POST":
         all_current_masks = current_app.config["CONTROLLER"].getAllMasks()
-        print(f"masks structure: {all_current_masks}")
-        print(f"masks typing: {type(all_current_masks)}")
+        # print(f"masks structure: {all_current_masks}")
+        # print(f"masks typing: {type(all_current_masks)}")
         valores = request.form
         dstRes = (int(valores["crW"]),int(valores["crH"]))
         srcRes = (int(valores["vrW"]),int(valores["vrH"]))
@@ -310,7 +310,7 @@ def get_masks():
 def get_video_frames():
     if request.method == "POST":
         frames = current_app.config["CONTROLLER"].getFrames()
-        print(f"frames: {frames}")
+        # print(f"frames: {frames}")
         return jsonify(frames)
     
 def frame_to_base64(frame):

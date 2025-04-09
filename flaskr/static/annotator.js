@@ -89,8 +89,8 @@ function stepBackward() {
 
 function loadVideo(){
   getFrames();
-  console.log("loading video")
-  console.log(videoFrames)
+  // console.log("loading video")
+  // console.log(videoFrames)
   ctx.drawImage(videoFrames[0], 0, 0, 1200, 800);
   requestAnimationFrame(updateCanvas);
   }
@@ -99,7 +99,7 @@ function updateCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // only draw if loaded and ready
   // console.log("updating canvas before conditional")
-  console.log(playing)
+  // console.log(playing)
   if (videoContainer !== undefined && videoContainer.ready) {
     // console.log("updating canvas")
     var top   = 0;
@@ -247,7 +247,7 @@ function nextFrame(){
 
   if(videoContainer !== undefined && videoContainer.ready){
     if(videoContainer.video.paused){
-      console.log("Prueba frame")
+      // console.log("Prueba frame")
       playNextFrame = true
       videoContainer.video.play()
       requestAnimationFrame(updateCanvas)
@@ -268,6 +268,7 @@ function changeModo() {
     document.getElementById("changeModo").innerText = "Correcion";
   } else if (modo === modosAnotador.ADDING) {
     modo = modosAnotador.CORRECION;
+
     document.getElementById("changeModo").innerText = "Modelo";
   }
 }
@@ -276,14 +277,14 @@ const handleCanvasEvents = evt =>{
   if (modo === modosAnotador.MODELO){
 
     puntos[currentFrame].push([evt.offsetX,evt.offsetY])
-    console.log(puntos)
+    // console.log(puntos)
     drawPoints(ctx)
   }
 }
 
 function drawPoints(canvas){
   for(var i = 0; i < puntos[currentFrame].length; i++){
-    console.log("drawing point...")
+    // console.log("drawing point...")
     x = puntos[currentFrame][i][0];
     y = puntos[currentFrame][i][1];
 
@@ -310,8 +311,8 @@ function createPointData(){
   for(var i = 0; i < frames; i++){
     puntos[i] = new Array()
   }
-  console.log(puntos)
-  console.log(videoContainer.video.duration)
+  // console.log(puntos)
+  // console.log(videoContainer.video.duration)
 }
 // function videoMute(){
 //     muted = !muted;
@@ -404,7 +405,7 @@ function addMasksToMainArray(masks,frameIndex=0){
     if (!(frameIndex in all_masks)){
       all_masks[frameIndex] = new Array()
       // all_masks[currentFrameAux].push(Array())
-      console.log("unidify")
+
     }
     all_masks[frameIndex].push(masks)
 }
@@ -412,7 +413,7 @@ function addMasksToMainArray(masks,frameIndex=0){
     if (!(currentFrameAux in all_masks)){
       all_masks[currentFrameAux] = new Array()
       // all_masks[currentFrameAux].push(Array())
-      console.log("unidify")
+
     }
     all_masks[currentFrameAux].push(masks)
 }
@@ -423,8 +424,8 @@ function drawMasks(){
 
   if (currentFrame in all_masks){
     masks = all_masks[currentFrame];
-    console.log("dibujando");
-    console.log(masks);
+    // console.log("dibujando");
+    // console.log(masks);
     masks.forEach(dibujarPoligonos);
   }
 
@@ -434,7 +435,7 @@ function drawMasks(){
 
 function addCorrectionToBackend(auxiliarCorrectionPoints){
   if (auxiliarCorrectionPoints.length > 0){
-    console.log("Adding correction to backend")
+    // console.log("Adding correction to backend")
     maskIndex = checkClosestMask(auxiliarCorrectionPoints)
     addPointsToMaskAjaxRequest(maskIndex,auxiliarCorrectionPoints)
 
@@ -447,23 +448,11 @@ function addNewMaskToBackend(){
   console.log("Adding new mask to backend")
   if (auxiliarNewMaskPoints.length > 0){
     console.log("Adding new mask to backend after conditional")
-    addPointsToMaskAjaxRequest(auxiliarNewMaskPoints)
+    addMaskAjaxRequest(auxiliarNewMaskPoints)
   }
   auxiliarNewMaskPoints = Array()
 
 } 
-
-// const listaDePoligonos = [
-//   // Triángulo
-//   [[100, 100], [150, 50], [200, 100]],
-
-//   // Cuadrado
-//   [[300, 300], [400, 300], [400, 400], [300, 400]],
-
-//   // Pentágono
-//   [[500, 150], [550, 100], [600, 150], [575, 200], [525, 200]]
-// ];
-
 
 // Event helpers
 
@@ -486,10 +475,11 @@ const mouseMove = evt => {
   if (!drawing) {
       return;
   }
-  if (maskOrCorrection){
+  if (modo === modosAnotador.ADDING){
     auxiliarNewMaskPoints.push([evt.offsetX, evt.offsetY]);
-  }else{
+  }else if(modo === modosAnotador.CORRECION){
     auxiliarCorrectionPoints.push([evt.offsetX, evt.offsetY]);
+    console.log(auxiliarCorrectionPoints)
   }
   continueStroke([evt.offsetX, evt.offsetY]);
   // console.log([evt.offsetX, evt.offsetY])
@@ -502,9 +492,9 @@ const mouseDown = evt => {
   }
     evt.preventDefault();
     canvas.addEventListener("mousemove", mouseMove, false);
-    if (maskOrCorrection){
+    if (modo=== modosAnotador.ADDING){
       auxiliarNewMaskPoints.push([evt.offsetX, evt.offsetY]);
-    }else{
+    }else if(modo === modosAnotador.CORRECION){
       auxiliarCorrectionPoints.push([evt.offsetX, evt.offsetY]);
     }
     startStroke([evt.offsetX, evt.offsetY]);
@@ -519,9 +509,9 @@ function calculateDistance(point1, point2) {
 
 function calculatePolygonDistance(polygon1, polygon2) {
   let minDistance = Infinity;
-  console.log("Calculating distance")
-  console.log(polygon1)
-  console.log(polygon2)
+  // console.log("Calculating distance")
+  // console.log(polygon1)
+  // console.log(polygon2)
   for (let i = 0; i < polygon1.length; i++) {
     for (let j = 0; j < polygon2.length; j++) {
       let distance = calculateDistance(polygon1[i], polygon2[j]);
@@ -536,15 +526,15 @@ function calculatePolygonDistance(polygon1, polygon2) {
 
 // Create a javascript function so that given an array of masks and a polygon made by a list of points, checks which mask is the closest to the polygon
 function checkClosestMask(polygon){
-  console.log("Checking closest mask")
-  console.log(polygon)
+  // console.log("Checking closest mask")
+  // console.log(polygon)
 
   let minDistance = Infinity
   let maskIndex = -1
   for (let i = 0; i < all_masks[currentFrame].length; i++){
     let mask = all_masks[currentFrame][i]
     let distance = calculatePolygonDistance(mask[0],polygon)
-    console.log(distance);
+    // console.log(distance);
     if (distance < minDistance){
       minDistance = distance
       maskIndex = i
@@ -565,7 +555,9 @@ const endStroke = evt => {
       return;
   }
   drawing = false;
-  addCorrectionToBackend(auxiliarCorrectionPoints)
+  if (modo === modosAnotador.CORRECION){
+    addCorrectionToBackend(auxiliarCorrectionPoints)
+  }
   evt.currentTarget.removeEventListener("mousemove", mouseMove, false);
 };
 
@@ -578,7 +570,7 @@ canvas.addEventListener("mouseenter", mouseEnter, false);
 
 function treat_masks(element){
   masks = Array()
-  console.log(element)
+  // console.log(element)
   for (var j=0; j<element.length;j++){
     masks.push(Array())
     for(var i=0; i<element[j].length;i++){
@@ -605,7 +597,7 @@ $("#apply_sam").on('submit',function (e) {
 
   },
   error: function(error){
-    console.log(error);
+    // console.log(error);
   },
 
   });
@@ -632,16 +624,16 @@ $("#apply_cutie").on('submit',function (e) {
       // // dibujarPoligonos(masks);
       // addMasksToMainArray(masks)
       masks_cutie = response
-      console.log(masks_cutie)      
+      // console.log(masks_cutie)      
       //Substituir esta función por un desglose del dict y ejecutar treat masks para cada instancia dentro del dict
       //pensar en revisar que coinicidan los frames
 
 
       for(let key in masks_cutie){
-        console.log("adding masks cutie")
-        console.log(key)
+        // console.log("adding masks cutie")
+        // console.log(key)
         temp_masks = treat_masks(masks_cutie[key])
-        console.log(temp_masks)
+        // console.log(temp_masks)
         addMasksToMainArray(masks_cutie[key],key)
       }
       drawMasks();
@@ -664,7 +656,21 @@ $("#apply_cutie").on('submit',function (e) {
   return false;
 });
 
-// generate a function that create an ajax request to the server that send a list of points to add to the currently selected mask
+
+/**
+ * Sends an AJAX POST request to add points to a mask on the backend.
+ * 
+ * This function communicates with the server to update a specific mask with 
+ * additional points. It also adjusts for video resolution and drawn video size 
+ * to ensure proper scaling. Upon success, it clears auxiliary correction points 
+ * and fetches the updated masks from the backend.
+ * 
+ * @param {number} maskIndex - The index of the mask to which points will be added.
+ * @param {Array} points - An array of points to be added to the mask.
+ * 
+ * @returns {void} This function does not return a value. It performs an asynchronous 
+ * operation and handles the response or error internally.
+ */
 function addPointsToMaskAjaxRequest(maskIndex, points){
   // console.log("Adding points to mask, backend request")
   // console.log(maskIndex)
@@ -676,7 +682,7 @@ function addPointsToMaskAjaxRequest(maskIndex, points){
     type:"POST",
     data: {frame:currentFrame,maskIndex:maskIndex, maskToAdd:JSON.stringify(points), vrW:videoRes[0], vrH:videoRes[1], crW:drawnVideoSize[0],crH:drawnVideoSize[1]},
     success: function(response){
-      console.log(response)
+      // console.log(response)
       auxiliarCorrectionPoints = Array()
       getMasksAjaxRequest()
     },
@@ -694,7 +700,7 @@ function addMaskAjaxRequest(points){
     type:"POST",
     data: {maskToAdd:JSON.stringify(points),frame:currentFrame, vrW:videoRes[0], vrH:videoRes[1], crW:drawnVideoSize[0],crH:drawnVideoSize[1]},
     success: function(response){
-      console.log(response)
+      // console.log(response)
       getMasksAjaxRequest()
     },
     error: function(error){
@@ -716,11 +722,11 @@ function getMasksAjaxRequest(){
     data: {vPad:verticalPadding, vrW:videoRes[0], vrH:videoRes[1], crW:drawnVideoSize[0],crH:drawnVideoSize[1]},
     success: function(response){
       masks_cutie = response
-      console.log(masks_cutie)      
+      // console.log(masks_cutie)      
 
       for(let key in masks_cutie){
         temp_masks = treat_masks(masks_cutie[key])
-        console.log(temp_masks)
+        // console.log(temp_masks)
         addMasksToMainArray(masks_cutie[key],key)
       }
       drawMasks();
@@ -733,6 +739,15 @@ function getMasksAjaxRequest(){
     });
 }
 
+/**
+ * Fetches frames from the server and processes them into image objects.
+ * 
+ * This function sends a POST request to the "/get_frames" endpoint to retrieve
+ * an array of base64-encoded image frames. Upon successful response, it converts
+ * each frame into an `Image` object and stores them in the `videoFrames` array.
+ * 
+ * If an error occurs during the AJAX request, it logs the error to the console.
+ */
 function getFrames() {
   temporalFrames = Array()
   $.ajax({
@@ -742,8 +757,8 @@ function getFrames() {
     success: function(response){
       masks_cutie = response
       let frames = masks_cutie.frames;
-      console.log("frames") 
-      console.log(frames)      
+      // console.log("frames") 
+      // console.log(frames)      
 
       frames.forEach((frame,index) => {
         let img = new Image();
