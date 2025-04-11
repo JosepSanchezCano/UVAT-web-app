@@ -1002,6 +1002,7 @@ class Model:
         return auxList
 
     def loadAnn(self, annFile):
+        print(annFile)
         self.currentPoints = dict()
         self.labels = dict()
         self.masks = dict()
@@ -1010,7 +1011,7 @@ class Model:
         jsonObj = json.load(jsonFile)
 
         anns = jsonObj["annotations"]
-
+        print(f"Annotations: {anns}")
         for item in anns:
             mask_as_points = self._generateMaskFromAnn(item["segmentation"][0])
             print(mask_as_points)

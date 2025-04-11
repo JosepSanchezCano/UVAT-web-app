@@ -33,7 +33,7 @@ current_frame_buffer_index = 0
 
 current_num_of_frames_buffered = 0
 current_video_path = None
-
+current_ann_path = None
 
 bp = Blueprint('blog', __name__)
 
@@ -257,6 +257,35 @@ def save_ann():
 
         temp = {'1':1}
         return jsonify(temp)
+
+@bp.route("/load_ann", methods=["GET","POST"])
+def load_ann():
+    if request.method == 'POST':
+        print(request.files)
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        
+        if file:
+            filename = secure_filename(file.filename)
+            # print(filename)
+            # global current_ann_path
+            # filepath = os.path.join('ann_files/',filename)
+            
+            # temp = os.path.join("flaskr/static/",filepath)
+            current_app.config["CONTROLLER"]._loadAnn(filename)
+            # current_ann_path = os.path.join(os.getcwd(),temp)
+            # file.save(current_ann_path)
+            # print(current_video_path)
+
+
+    temp = {'1':1}
+    return jsonify(temp)
 
 @bp.route("/add_points_to_mask", methods=["GET","POST"])
 def add_points_to_mask():

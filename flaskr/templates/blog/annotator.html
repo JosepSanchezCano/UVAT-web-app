@@ -70,15 +70,22 @@
                     </li>
                     <li>
                         <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Products">
-                            <button src="{{url_for('static', filename='images/floppy.svg')}}" title="Save annotations" id="saveAnn">
-                            <!-- <p>Save annotations</p> -->
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Customers">
-                            <i class="bi-people fs-1"></i>
-                        </a>
-                    </li>
+                            <button id="saveAnn" title="Save annotations">Save annotations</button>
+                        </a>  </li>
+                        <li class="nav-item">
+
+                            <a href="#" class="nav-link py-3 px-2" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                                {#<!-- <input type="file" id="myFile" name="filename">
+                                <input type="submit" value="Load Video"> -->
+                                <!-- <i class="bi-house fs-1">Load video</i> -->#}
+                                <form  action="/load_ann" method = "POST" id="load_ann_form" enctype="multipart/form-data">
+                                    <label for="upload-file_ann">Load Annotations</label>
+                                    <input type="file" name="file" id="upload-file_ann"/>
+                                    <input type = "submit" value="Upload">
+                                </form>
+                            </a>
+                        </li>
+  
                 </ul>
                 <div class="dropdown">
                     <a href="#" class="d-flex align-items-center justify-content-center p-3 link-dark text-decoration-none dropdown-toggle" id="dropdownUser3" data-bs-toggle="dropdown" aria-expanded="false">

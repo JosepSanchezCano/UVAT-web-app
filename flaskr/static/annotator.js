@@ -87,6 +87,42 @@ function stepBackward() {
 }
 
 
+/**
+ * Fetches frames from the server and processes them into image objects.
+ * 
+ * This function sends a POST request to the "/get_frames" endpoint to retrieve
+ * an array of base64-encoded image frames. Upon successful response, it converts
+ * each frame into an `Image` object and stores them in the `videoFrames` array.
+ * 
+ * If an error occurs during the AJAX request, it logs the error to the console.
+ */
+function getFrames() {
+  temporalFrames = Array()
+  $.ajax({
+    url:"/get_frames",
+    type:"POST",
+    data: {},
+    success: function(response){
+      masks_cutie = response
+      let frames = masks_cutie.frames;
+      // console.log("frames") 
+      // console.log(frames)      
+
+      frames.forEach((frame,index) => {
+        let img = new Image();
+        img.src = "data:image/jpeg;base64,"+frame;
+        temporalFrames.push(img);
+      });
+
+      videoFrames = temporalFrames;
+    },
+    error: function(error){
+      console.log(error);
+    },
+  
+    });
+}
+
 function loadVideo(){
   getFrames();
   // console.log("loading video")
@@ -314,6 +350,7 @@ function createPointData(){
   // console.log(puntos)
   // console.log(videoContainer.video.duration)
 }
+
 // function videoMute(){
 //     muted = !muted;
 // 	if(muted){
@@ -339,6 +376,20 @@ document.getElementById("nextFrame").addEventListener("click",stepForward)
 document.getElementById("lastFrame").addEventListener("click",stepBackward)
 document.getElementById("changeModo").addEventListener("click",changeModo)
 
+$("#load_ann_form").on('submit',function (e) {
+  e.preventDefault();
+  $.ajax({
+  url:"/load_ann",
+  type:"POST",
+  data: {},
+  success: function(response){
+      // console.log(all_masks)
+      // masks = treat_masks(response);
+      // addMasksToMainArray(masks)
+      getMasksAjaxRequest()
+  },
+});
+}); 
 //
 //
 ///////// Canvas event paint
@@ -500,7 +551,7 @@ const mouseDown = evt => {
     startStroke([evt.offsetX, evt.offsetY]);
     // console.log([evt.offsetX, evt.offsetY])
   }
-  
+
 };
 
 function calculateDistance(point1, point2) {
@@ -739,38 +790,4 @@ function getMasksAjaxRequest(){
     });
 }
 
-/**
- * Fetches frames from the server and processes them into image objects.
- * 
- * This function sends a POST request to the "/get_frames" endpoint to retrieve
- * an array of base64-encoded image frames. Upon successful response, it converts
- * each frame into an `Image` object and stores them in the `videoFrames` array.
- * 
- * If an error occurs during the AJAX request, it logs the error to the console.
- */
-function getFrames() {
-  temporalFrames = Array()
-  $.ajax({
-    url:"/get_frames",
-    type:"POST",
-    data: {},
-    success: function(response){
-      masks_cutie = response
-      let frames = masks_cutie.frames;
-      // console.log("frames") 
-      // console.log(frames)      
 
-      frames.forEach((frame,index) => {
-        let img = new Image();
-        img.src = "data:image/jpeg;base64,"+frame;
-        temporalFrames.push(img);
-      });
-
-      videoFrames = temporalFrames;
-    },
-    error: function(error){
-      console.log(error);
-    },
-  
-    });
-}
