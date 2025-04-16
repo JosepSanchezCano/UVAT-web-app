@@ -67,7 +67,7 @@ def video_feed():
         
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            # print(filename)
+            print(f"filename: {filename}, file: {file}")
             global current_video_path
             filepath = os.path.join('video_files/',filename)
             
@@ -261,24 +261,26 @@ def save_ann():
 @bp.route("/load_ann", methods=["GET","POST"])
 def load_ann():
     if request.method == 'POST':
-        print(request.files)
-        if 'file' not in request.files:
+        print(request.form)
+        if 'file' not in request.form:
             flash('No file part')
             return redirect(request.url)
-        file = request.files['file']
+        file = request.form['file']
 
-        if file.filename == '':
+        if file == '':
             flash('No selected file')
             return redirect(request.url)
         
         if file:
-            filename = secure_filename(file.filename)
-            # print(filename)
+            # filename = secure_filename(file)
+            filename = file.split('\\')[-1]
+            filename = f"output/{filename}"
+            print(f"filename: {filename}, file: {file}")
             # global current_ann_path
             # filepath = os.path.join('ann_files/',filename)
             
             # temp = os.path.join("flaskr/static/",filepath)
-            current_app.config["CONTROLLER"]._loadAnn(filename)
+            current_app.config["CONTROLLER"].load_ann(filename)
             # current_ann_path = os.path.join(os.getcwd(),temp)
             # file.save(current_ann_path)
             # print(current_video_path)

@@ -378,10 +378,12 @@ document.getElementById("changeModo").addEventListener("click",changeModo)
 
 $("#load_ann_form").on('submit',function (e) {
   e.preventDefault();
+  path_to_ann_file = $("#upload-file_ann").val()
+  console.log(path_to_ann_file)
   $.ajax({
   url:"/load_ann",
   type:"POST",
-  data: {},
+  data: {file:path_to_ann_file},
   success: function(response){
       // console.log(all_masks)
       // masks = treat_masks(response);
@@ -766,7 +768,11 @@ function addMaskAjaxRequest(points){
 // generate a function that create an ajax request to the server that asks for all the masks to be sent to the frontend and then clean the current masks and add the new ones
 function getMasksAjaxRequest(){
   var videoRes = [videoContainer.video.videoWidth,videoContainer.video.videoHeight]
+  scale = videoContainer.scale;
+  vidH = videoContainer.video.videoHeight;
+  vidW = videoContainer.video.videoWidth;
 
+  drawnVideoSize = [Math.floor(vidW * scale), Math.floor(vidH * scale)];
   $.ajax({
     url:"/get_masks",
     type:"POST",
