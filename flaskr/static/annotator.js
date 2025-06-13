@@ -730,6 +730,7 @@ function addPointsToMaskAjaxRequest(maskIndex, points){
   // console.log("maskIndex above, points below")
   // console.log(points)
   var videoRes = [videoContainer.video.videoWidth,videoContainer.video.videoHeight]
+  console.log("videoRes")
   $.ajax({
     url:"/add_points_to_mask",
     type:"POST",
