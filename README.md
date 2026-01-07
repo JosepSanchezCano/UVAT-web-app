@@ -5,9 +5,9 @@ This repository provides a model for a web-based video annotation tool that leve
 
 The app is built using Flask as a framework to manage frontend requests to the backend, which is written in Python. The backend handles video processing and AI model execution, while the frontend is more complex than usual, as it manages the display of masks and synchronization between the frontend and backend.
 
-## AI Models
+## Models
 
-- **SAM (Segment Anything Model)** from Meta: Handles instance segmentation tasks.
+- **SAM2 (Segment Anything Model)** from Meta: Handles instance segmentation tasks.
 - **Cutie (VOS Model)**: Propagates masks throughout the video.
 
 ## Features
